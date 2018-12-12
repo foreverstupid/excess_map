@@ -18,11 +18,11 @@ struct kurtic_params{
 };
 
 
+int kurtic_f(const gsl_vector *x, void *params, gsl_vector *f);
 
-/*
- * Kurtic function calculator.
- * Calculates two values: dispersion and excess
- */
-int kurtic(const gsl_vector *x, void *params, gsl_vector *f);
+int kurtic_df(const gsl_vector *x, void *params, gsl_matrix *J);
+
+int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
+    gsl_matrix *J);
 
 #endif

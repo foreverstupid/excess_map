@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_multiroots.h>
@@ -18,6 +19,8 @@ struct problem_info{
     struct linspace d_grid;         /* grid of dispersion */
 
     struct linspace space_grid;     /* grid of space */
+    int iter_count;
+    double eps;
 };
 
 

@@ -50,6 +50,9 @@ struct problem_info make_problem_info(int argc, const char **argv)
     info.space_grid.count = count;
     info.space_grid.step = (last - beg) / (count - 1);
 
+    sscanf(argv[10], "%lf", &(info.eps));
+    info.iter_count = 100;
+
     return info;
 }
 
@@ -61,7 +64,7 @@ struct problem_info make_problem_info(int argc, const char **argv)
 struct output_info make_output_info(int argc, const char **argv,
     struct problem_info p)
 {
-    struct output_info info = { argv[10], p.k_grid, p.d_grid };
+    struct output_info info = { argv[11], p.k_grid, p.d_grid };
     return info;
 }
 

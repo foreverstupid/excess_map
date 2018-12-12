@@ -85,7 +85,7 @@ int assert_int(int x, int y, const char *msg)
  */
 int test_integral()
 {
-    int count = 1000;
+    int count = 1001;
     double origin = 0.0;
     double last = 1.0;
 
@@ -126,7 +126,7 @@ int test_integral()
  */
 int test_norm()
 {
-    int count = 10000;
+    int count = 10001;
     double origin = 0.0;
     double last = 2 * M_PI;
 
@@ -183,6 +183,9 @@ int test_solver()
     pinf.space_grid.count = 10000;
     pinf.space_grid.step =
         (10.0 - pinf.space_grid.origin) / (pinf.space_grid.count - 1);
+
+    pinf.iter_count = 100;
+    pinf.eps = 1e-4;
 
     res = solve(pinf);
 

@@ -3,10 +3,10 @@
 /*
  * Initializes multidimensional solver.
  */
-static gsl_multiroot_fsolver *make_solver()
+static gsl_multiroot_fdfsolver *make_solver()
 {
-    const gsl_multiroot_fsolver_type *T = gsl_multiroot_fsolver_hybrid;
-    return gsl_multiroot_fsolver_alloc(T, 2);
+    const gsl_multiroot_fdfsolver_type *T = gsl_multiroot_fdfsolver_gnewton;
+    return gsl_multiroot_fdfsolver_alloc(T, 2);
 }
 
 
@@ -30,20 +30,26 @@ static void init_result_info(struct result *res, struct problem_info p)
 /*
  * Solves an equation system
  */
-static void find_root(double *s0, double *s1, gsl_multiroot_fsolver *solver,
-    gsl_multiroot_function *f, int max_iter_count, double eps)
+static void find_root(
+    double *s0,
+    double *s1,
+    gsl_multiroot_fdfsolver *solver,
+    gsl_multiroot_function_fdf *f,
+    int max_iter_count,
+    double eps
+)
 {
     int status;
     size_t iter = 0;
     gsl_vector *x = gsl_vector_alloc(2);
-    gsl_vector_set(x, 0, 1.0);
+    gsl_vector_set(x, 0, 5.0);
     gsl_vector_set(x, 1, 1.0);
 
-    gsl_multiroot_fsolver_set(solver, f, x);
+    gsl_multiroot_fdfsolver_set(solver, f, x);
 
     do{
         iter++;
-        status = gsl_multiroot_fsolver_iterate(solver);
+        status = gsl_multiroot_fdfsolver_iterate(solver);
 
         if(status){
             printf("Stucked! (%ld)\n", iter);
@@ -55,6 +61,8 @@ static void find_root(double *s0, double *s1, gsl_multiroot_fsolver *solver,
 
     *s0 = gsl_vector_get(solver->x, 0);
     *s1 = gsl_vector_get(solver->x, 1);
+
+    printf("Solution: (%lf, %lf)\n", *s0, *s1);
 
     gsl_vector_free(x);
 }
@@ -69,9 +77,9 @@ struct result solve(struct problem_info p)
     int i;
     int j;
     double k = p.k_grid.origin;
-    double d = p.d_grid.origin;
-    gsl_multiroot_fsolver *solver = make_solver();
-    gsl_multiroot_function f = { &kurtic, 2, NULL };
+    double d;
+    gsl_multiroot_fdfsolver *solver = make_solver();
+    gsl_multiroot_function_fdf f = { &kurtic_f, &kurtic_df, &kurtic_fdf, 2, NULL };
     struct kurtic_params params;
     struct result res;
 
@@ -81,6 +89,7 @@ struct result solve(struct problem_info p)
     f.params = &params;
 
     for(i = 0; i < p.k_grid.count; i++){
+        d = p.d_grid.origin;
         for(j = 0; j < p.d_grid.count; j++){
             params.k = k;
             params.d = d;
@@ -90,18 +99,18 @@ struct result solve(struct problem_info p)
                 res.s1.storage + i * p.d_grid.count + j,
                 solver,
                 &f,
-                1000,
-                1e-4
+                p.iter_count,
+                p.eps
             );
 
-            k += p.k_grid.step;
+            d += p.d_grid.step;
         }
 
-        d += p.d_grid.step;
+        k += p.k_grid.step;
     }
 
     free(params.buffer.storage);
-    gsl_multiroot_fsolver_free(solver);
+    gsl_multiroot_fdfsolver_free(solver);
 
     return res;
 }
