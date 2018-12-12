@@ -5,7 +5,11 @@
  */
 inline static double weight(int i, int n, double step)
 {
-    return i == 0 || i == n - 1 ? step / 2 : step;
+    double s = step / 3;
+
+    return
+        i == 0 || i == n - 1 ? s :
+        i % 2 == 1 ? 4 * s : 2 * s;
 }
 
 
