@@ -17,6 +17,9 @@ $(NAME): main.c $(OBJS)
 tests: test.c $(OBJS)
 	$(CC) $(CXXFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
 
+excess_calculator: excess_calculator.c $(OBJS)
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
+
 ifneq (clean, $(MAKECMDGOALS))
 -include deps.mk
 endif

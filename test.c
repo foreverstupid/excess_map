@@ -170,6 +170,7 @@ int test_solver()
     int flag;
     struct problem_info pinf;
     struct result res;
+    double eps = 1e-5;
 
     pinf.k_grid.origin = 0.0;
     pinf.k_grid.step = 0.0;
@@ -179,21 +180,21 @@ int test_solver()
     pinf.d_grid.step = 0.0;
     pinf.d_grid.count = 1;
 
-    pinf.space_grid.origin = -10.0;
-    pinf.space_grid.count = 10000;
+    pinf.space_grid.origin = -30.0;
+    pinf.space_grid.count = 100001;
     pinf.space_grid.step =
-        (10.0 - pinf.space_grid.origin) / (pinf.space_grid.count - 1);
+        (30.0 - pinf.space_grid.origin) / (pinf.space_grid.count - 1);
 
     pinf.iter_count = 100;
-    pinf.eps = 1e-4;
+    pinf.eps = 1e-9;
 
     res = solve(pinf);
 
     flag =
         assert_int(res.s0.grid.count, 1, "S0 count") &&
         assert_int(res.s1.grid.count, 1, "S1 count") &&
-        assert_double(1.0 / M_PI, res.s0.storage[0], 1e-3, "s0") &&
-        assert_double(1.0 / M_PI, res.s1.storage[0], 1e-3, "s1");
+        assert_double(1.0 / M_PI / M_PI, res.s0.storage[0], eps, "s0") &&
+        assert_double(1.0 / M_PI / M_PI, res.s1.storage[0], eps,"s1");
 
     free(res.s0.storage);
     free(res.s1.storage);

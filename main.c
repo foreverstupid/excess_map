@@ -34,23 +34,19 @@ struct problem_info make_problem_info(int argc, const char **argv)
     sscanf(argv[3], "%lf", &(last));
     info.k_grid.origin = beg;
     info.k_grid.count = count;
-    info.k_grid.step = (last - beg) / (count - 1);
+    info.k_grid.step = count > 1 ? (last - beg) / (count - 1) : 0.0;
 
     sscanf(argv[4], "%lf", &(beg));
     sscanf(argv[5], "%d", &(count));
     sscanf(argv[6], "%lf", &(last));
     info.d_grid.origin = beg;
     info.d_grid.count = count;
-    info.d_grid.step = (last - beg) / (count - 1);
+    info.d_grid.step = count > 1 ? (last - beg) / (count - 1) : 0.0;
 
-    sscanf(argv[7], "%lf", &(beg));
-    sscanf(argv[8], "%d", &(count));
-    sscanf(argv[9], "%lf", &(last));
-    info.space_grid.origin = beg;
+    sscanf(argv[7], "%d", &(count));
     info.space_grid.count = count;
-    info.space_grid.step = (last - beg) / (count - 1);
 
-    sscanf(argv[10], "%lf", &(info.eps));
+    sscanf(argv[8], "%lf", &(info.eps));
     info.iter_count = 100;
 
     return info;
@@ -64,7 +60,7 @@ struct problem_info make_problem_info(int argc, const char **argv)
 struct output_info make_output_info(int argc, const char **argv,
     struct problem_info p)
 {
-    struct output_info info = { argv[11], p.k_grid, p.d_grid };
+    struct output_info info = { argv[9], p.k_grid, p.d_grid };
     return info;
 }
 
@@ -84,6 +80,7 @@ void print(struct result res, struct output_info oinf)
 
     for(i = 0; i < oinf.k_grid.count; i++){
         index = i * oinf.d_grid.count;
+        d = oinf.d_grid.origin;
         for(j = 0; j < oinf.d_grid.count; j++){
             fprintf(
                 out,

@@ -3,3 +3,11 @@
 excess
 *.mk
 *.plt
+neuman
+*.swp
+*.swo
+*.png
+*.jpg
+*.args
+*.tmp
+excess_calculator

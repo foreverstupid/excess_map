@@ -11,6 +11,24 @@ inline static double kernel(double x, double s0, double s1)
 
 
 
+static double get_origin(double s0, double s1)
+{
+    double x = 0.0;
+    double step = 1e-5;
+
+    while(fabs(kernel(x, s0, s1)) > 1e-12){
+        x -= step;
+    }
+
+#   ifdef DEBUG
+    printf("Origin: %lf\n", x);
+#   endif
+
+    return x;
+}
+
+
+
 static void get_current_values_df(double s0, double s1, struct vector_func *buf, gsl_matrix *J)
 {
     double norm;
@@ -27,6 +45,9 @@ static void get_current_values_df(double s0, double s1, struct vector_func *buf,
     double d4;
     double tmp;
     int i;
+
+    buf->grid.origin = get_origin(s0, s1);
+    buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
 
     x = buf->grid.origin;
     for(i = 0; i < buf->grid.count; i++){
@@ -87,6 +108,11 @@ static void get_current_values_df(double s0, double s1, struct vector_func *buf,
     gsl_matrix_set(J, 0, 1, dmus1);
     gsl_matrix_set(J, 1, 0, dsgms0);
     gsl_matrix_set(J, 1, 1, dsgms1);
+
+#   ifdef DEBUG
+    printf("J = [ %10.3lf, %10.3lf ]\n", dmus0, dmus1);
+    printf("    [ %10.3lf, %10.3lf ]\n", dsgms0, dsgms1);
+#   endif
 }
 
 
@@ -94,7 +120,7 @@ static void get_current_values_df(double s0, double s1, struct vector_func *buf,
 
 
 static void get_current_values_fdf(double *k, double *d, double s0, double s1,
-    const struct vector_func *buf, gsl_matrix *J)
+    struct vector_func *buf, gsl_matrix *J)
 {
     double norm;
     double mu;
@@ -109,6 +135,9 @@ static void get_current_values_fdf(double *k, double *d, double s0, double s1,
     double d4;
     double tmp;
     int i;
+
+    buf->grid.origin = get_origin(s0, s1);
+    buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
 
     x = buf->grid.origin;
     for(i = 0; i < buf->grid.count; i++){
@@ -175,11 +204,14 @@ static void get_current_values_fdf(double *k, double *d, double s0, double s1,
 
 
 static void get_current_values_f(double *k, double *d, double s0, double s1,
-    const struct vector_func *buf)
+    struct vector_func *buf)
 {
     double norm;
     double x;
     int i;
+
+    buf->grid.origin = get_origin(s0, s1);
+    buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
 
     x = buf->grid.origin;
     for(i = 0; i < buf->grid.count; i++){
@@ -204,6 +236,15 @@ static void get_current_values_f(double *k, double *d, double s0, double s1,
     }
 
     *k = get_integral(buf) / norm / (*d) / (*d) - 3;
+#       ifdef DEBUG
+        printf("k = %lf, d = %lf\n", *k, *d);
+        printf("{s0 = %lf, s1 = %lf}\n", s0, s1);
+#       endif
+}
+
+inline static double psgn(double x)
+{
+    return 0.0;//x > 0 ? 0.0 : 1.0;
 }
 
 
@@ -219,8 +260,8 @@ int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
 
     get_current_values_fdf(&curr_k, &curr_d, s0, s1, &(p->buffer), J);
 
-    gsl_vector_set(f, 0, curr_k - p->k);
-    gsl_vector_set(f, 1, curr_d - p->d);
+    gsl_vector_set(f, 0, curr_k - p->k + psgn(s0) + psgn(s1));
+    gsl_vector_set(f, 1, curr_d - p->d + psgn(s0) + psgn(s1));
 
     return GSL_SUCCESS;
 }
@@ -250,10 +291,8 @@ int kurtic_f(const gsl_vector *x, void *params, gsl_vector *f)
 
     get_current_values_f(&curr_k, &curr_d, s0, s1, &(p->buffer));
 
-    gsl_vector_set(f, 0, curr_k - p->k);
-    gsl_vector_set(f, 1, curr_d - p->d);
+    gsl_vector_set(f, 0, curr_k - p->k + psgn(s0) + psgn(s1));
+    gsl_vector_set(f, 1, curr_d - p->d + psgn(s0) + psgn(s1));
 
     return GSL_SUCCESS;
 }
-
-
