@@ -82,6 +82,11 @@ void get_begin(double d, double k, double *s0, double *s1)
         return;
     }
 
+    if(k > 0){
+        *s0 = 3;
+        *s1 = 2;
+    }
+
     *s0 = 400;
     *s1 = 0.01;
 

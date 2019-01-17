@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 
-input_file_name = "surface3d.plt"
-output_file_name = "plots3d.png"
+dimension = "3"
+input_file_name = "surface" + dimension + "d.plt"
+output_file_name = "plots" + dimension + "d.png"
 
 # size of plot matrix
 m = n = 5
@@ -22,14 +23,14 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.01
+smooth_coeff = 0.1
 
 # titles
-km_subtitles = [ r"$k_m = -1.0$", r"$k_m = -0.75$", r"$k_m = -0.5$",
-                 r"$k_m = -0.25$", r"$k_m = 0.0$" ]
-kw_subtitles = [ r"$k_w = -1.0$", r"$k_w = -0.75$",
-                 r"$k_w = -0.5$", r"$k_w = -0.25$",
-                 r"$k_w = 0.0$" ]
+km_subtitles = [ r"$k_m = -1.0$", r"$k_m = -0.5$", r"$k_m = 0.0$",
+                 r"$k_m = 0.5$", r"$k_m = 1.0$" ]
+kw_subtitles = [ r"$k_w = -1.0$", r"$k_w = -0.5$",
+                 r"$k_w = 0.0$", r"$k_w = 0.5$",
+                 r"$k_w = 1.0$" ]
 
 # ticks count
 xt_cnt = 5

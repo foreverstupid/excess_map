@@ -3,7 +3,7 @@
 # m(x) excess grid
 origin_k_m=-1.0
 count_k_m=5
-last_k_m=0.0
+last_k_m=1.0
 
 # m(x) dispersion grid
 origin_d_m=0.05
@@ -13,7 +13,7 @@ last_d_m=0.5
 # w(x) excess grid
 origin_k_w=-1.0
 count_k_w=5
-last_k_w=0.0
+last_k_w=1.0
 
 # w(x) dispersion grid
 origin_d_w=0.05
