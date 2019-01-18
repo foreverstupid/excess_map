@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 
-dimension = "3"
+dimension = "1"
 input_file_name = "surface" + dimension + "d.plt"
 output_file_name = "plots" + dimension + "d.png"
 
@@ -15,7 +15,7 @@ shift = 225
 
 # boundary of data values
 zmin = 0.0
-zmax = 20
+zmax = 8.0
 
 # data columns
 x_column = 2;
@@ -23,7 +23,7 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.1
+smooth_coeff = 0.01
 
 # titles
 km_subtitles = [ r"$k_m = -1.0$", r"$k_m = -0.5$", r"$k_m = 0.0$",
@@ -52,7 +52,7 @@ Z_dat = dat[:,z_column]
 
 # creating matrix
 fig, axes = plt.subplots(figsize = matrix_size, nrows = m, ncols = n)
-fig.suptitle(r"$N(k_m, k_w, \sigma_m, \sigma_w)$ (3D case)", fontsize = 35)
+fig.suptitle(r"$N(k_m, k_w, \sigma_m, \sigma_w)$ (" + dimension + "D case)", fontsize = 35)
 
 plot_number = 0
 for ax in axes[::-1].flat:
@@ -71,7 +71,7 @@ for ax in axes[::-1].flat:
     zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method = 'cubic')
 
     # current heatmap building
-    clev = np.arange(zi.min(), zi.max(), smooth_coeff)
+    clev = np.arange(zmin, zmax, smooth_coeff)
     hm = ax.contourf(xi, yi, zi, clev, cmap = plt.cm.inferno, vmax = zmax,
         vmin = zmin)
     ax.set_title(km_subtitles[plot_number % 5] + ", " +

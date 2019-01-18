@@ -26,7 +26,7 @@ count_space=100001
 last_space=1
 
 #accurancy
-eps=0.0001
+eps=0.001
 
 m_args="m.txt"
 w_args="w.txt"
