@@ -19,8 +19,12 @@ m = n = 5
 shift = 225
 
 # boundary of data values
-zmin = 0.0
-zmax = 8.0
+if len(sys.argv) > 3:
+    zmin = float(sys.argv[2])
+    zmax = float(sys.argv[3])
+else:
+    zmin = 0.0
+    zmax = 8.0
 
 # data columns
 x_column = 2;
