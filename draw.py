@@ -32,14 +32,29 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.01
+smooth_coeff = 0.05
 
-# titles
-km_subtitles = [ r"$k_m = -1.0$", r"$k_m = -0.5$", r"$k_m = 0.0$",
-                 r"$k_m = 0.5$", r"$k_m = 1.0$" ]
-kw_subtitles = [ r"$k_w = -1.0$", r"$k_w = -0.5$",
-                 r"$k_w = 0.0$", r"$k_w = 0.5$",
-                 r"$k_w = 1.0$" ]
+# titles making
+if len(sys.argv) > 5:
+    k_min = float(sys.argv[4])
+    k_max = float(sys.argv[5])
+else:
+    k_min = -1.0
+    k_max = 1.0
+
+km_subtitles = []
+k_step = (k_max - k_min) / (m - 1)
+tmp = k_min
+for i in range(m):
+    km_subtitles.append(r"$k_m = %5.2f$" % (tmp))
+    tmp += k_step
+
+kw_subtitles = []
+k_step = (k_max - k_min) / (n - 1)
+tmp = k_min
+for i in range(n):
+    kw_subtitles.append(r"$k_w = %5.2f$" % (tmp))
+    tmp += k_step
 
 # ticks count
 xt_cnt = 5
@@ -101,7 +116,7 @@ cax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 # color bar settings
 cbar = fig.colorbar(hm, cax = cax)
 cbar.locator = ticker.MaxNLocator(10)
-cbar.formatter = ticker.FormatStrFormatter("%0.0f")
+cbar.formatter = ticker.FormatStrFormatter("%3.1f")
 cbar.update_ticks()
 
 fig.savefig(output_file_name)
