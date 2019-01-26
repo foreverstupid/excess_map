@@ -1,9 +1,14 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 
-dimension = "1"
+if len(sys.argv) > 1:
+    dimension = sys.argv[1]
+else:
+    dimension = "1"
+
 input_file_name = "surface" + dimension + "d.plt"
 output_file_name = "plots" + dimension + "d.png"
 
