@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +34,7 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.05
+smooth_coeff = 0.1
 
 # titles making
 if len(sys.argv) > 5:
@@ -41,6 +43,11 @@ if len(sys.argv) > 5:
 else:
     k_min = -1.0
     k_max = 1.0
+
+# show given info
+print(f"Dimension:        {dimension}")
+print(f"Excess range:     {k_min}..{k_max}")
+print(f"Values range:     {zmin}..{zmax}")
 
 km_subtitles = []
 k_step = (k_max - k_min) / (m - 1)
@@ -80,6 +87,8 @@ fig.suptitle(r"$N(k_m, k_w, \sigma_m, \sigma_w)$ (" + dimension + "D case)", fon
 
 plot_number = 0
 for ax in axes[::-1].flat:
+    print(f"{plot_number + 1} plot creating...")
+
     # convert from pandas dataframes to numpy arrays
     X, Y, Z, = np.array([]), np.array([]), np.array([])
     for i in range(plot_number * shift, plot_number * shift + shift):
@@ -96,8 +105,9 @@ for ax in axes[::-1].flat:
 
     # current heatmap building
     clev = np.arange(zmin, zmax, smooth_coeff)
-    hm = ax.contourf(xi, yi, zi, clev, cmap = plt.cm.inferno, vmax = zmax,
-        vmin = zmin)
+    hm = ax.contourf(xi, yi, zi, clev, cmap = plt.cm.nipy_spectral,
+        vmax = zmax, vmin = zmin, extend = "both")
+    hm.set_clim(zmin, zmax)
     ax.set_title(km_subtitles[plot_number % 5] + ", " +
         kw_subtitles[plot_number // 5], y = 1.1, fontsize = 22)
     ax.set_xlabel(r"$\sigma_m$")
@@ -109,6 +119,8 @@ for ax in axes[::-1].flat:
     ax.tick_params(axis = "both", which = "both", labelsize = tck_size)
 
     plot_number = plot_number + 1
+
+print("Drawing...")
 
 fig.subplots_adjust(right = 0.8, top = 0.9, wspace = 0.4, hspace = 0.6)
 cax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
