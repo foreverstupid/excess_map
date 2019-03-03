@@ -64,8 +64,6 @@ static void find_root(
     *s0 = gsl_vector_get(solver->x, 0);
     *s1 = gsl_vector_get(solver->x, 1);
 
-    printf("Solution: (s0 = %lf, s1 = %lf)\n\n", *s0, *s1);
-
     gsl_vector_free(x);
 }
 
@@ -131,9 +129,7 @@ struct result solve(struct problem_info p)
                 params.buffer.grid.count);
 #           endif
 
-            get_begin(params.d, params.k, &s0, &s1);
-            printf("Input: (k = %lf, d = %lf)\n", k, params.d);
-
+            get_begin(params.d, params.k, &s0, &s1); 
             find_root(
                 res.s0.storage + i * p.d_grid.count + j,
                 res.s1.storage + i * p.d_grid.count + j,
@@ -141,6 +137,14 @@ struct result solve(struct problem_info p)
                 &f,
                 p.iter_count,
                 p.eps,
+                s0,
+                s1
+            );
+            printf(
+                "Input: (k = %lf, d = %lf)\n"
+                "Solution: (s0 = %lf, s1 = %lf)\n\n",
+                k,
+                params.d,
                 s0,
                 s1
             );

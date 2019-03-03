@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # m(x) excess grid
-km_grid="-1.0 -0.5 0.0 -1.0 -2.0 -4.0"
+km_grid="-1.0 -0.5 0.0 1.0 2.0 4.0"
 count_k_m=6
 
 # m(x) dispersion grid
