@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # m(x) excess grid
-km_grid="-1.0 -0.5 0.0 1.0 2.0 4.0"
+km_grid="-1.0 -0.5 0.0 -1.0 -2.0 -4.0"
 count_k_m=6
 
 # m(x) dispersion grid
 origin_d_m=0.05
-count_d_m=15
+count_d_m=20
 last_d_m=0.5
 
 # w(x) excess grid
@@ -15,7 +15,7 @@ count_k_w=6
 
 # w(x) dispersion grid
 origin_d_w=0.05
-count_d_w=15
+count_d_w=20
 last_d_w=0.5
 
 #accurancy
@@ -24,7 +24,6 @@ eps=0.001
 m_args="m.txt"
 w_args="w.txt"
 rm -f $m_args $w_args
-temp_file=`mktemp`
 
 args=$1
 if [ -z $args ]
@@ -35,14 +34,26 @@ fi
 # WARNING!!! second part was removed due to similar grids for m and w.
 # If you want to compute not symmetrical case, please add the second part
 echo "Creating arguments..."
+ind=0
 for km in $km_grid
 do
+    temp_files[$ind]=`mktemp`
     ./excess $km 1 $km $origin_d_m $count_d_m $last_d_m \
-             100001 $eps $temp_file
-
-    cat $temp_file >> $m_args
+             100001 $eps ${temp_files[$ind]} &
+    pids[$ind]=$!
+    ((ind += 1))
 done
-rm -f $temp_file
+
+for pid in ${pids[*]}
+do
+    wait $pid
+done
+
+for temp_file in ${temp_files[*]}
+do
+    cat $temp_file >> $m_args
+    rm -f $temp_file
+done
 
 cp $m_args $w_args
 echo "Collecting them together..."
