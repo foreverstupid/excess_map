@@ -145,8 +145,8 @@ struct result solve(struct problem_info p)
                 "Solution: (s0 = %lf, s1 = %lf)\n\n",
                 k,
                 params.d,
-                s0,
-                s1
+                res.s0.storage[i * p.d_grid.count + j],
+                res.s1.storage[i * p.d_grid.count + j]
             );
 
             d += p.d_grid.step;
