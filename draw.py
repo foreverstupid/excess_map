@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import matplotlib.colors as colors
 from scipy.interpolate import griddata
 
 if len(sys.argv) > 1:
@@ -16,10 +17,10 @@ input_file_name = "surface" + dimension + "d.plt"
 output_file_name = "plots" + dimension + "d.png"
 
 # plot matrix dimensions
-m = n = 5
+m = n = 6
 
 # count of data values for the one plot
-shift = 225
+shift = 400
 
 # boundary of data values
 if len(sys.argv) > 3:
@@ -35,34 +36,60 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.1
+smooth_coeff = 0.07
 
-# titles making
+# excess ranges setting
 if len(sys.argv) > 5:
     k_min = float(sys.argv[4])
     k_max = float(sys.argv[5])
+    linear_excess_range = True
 else:
-    k_min = -1.0
-    k_max = 1.0
+    linear_excess_range = False
 
 # show given info
 print(f"Dimension:        {dimension}")
-print(f"Excess range:     {k_min}..{k_max}")
+
+if linear_excess_range:
+    print(f"Excess range:     {k_min}..{k_max}")
+else:
+    print("Excess range:     nonlinear")
+
 print(f"Values range:     {zmin}..{zmax}")
 
+# excess titles making
 km_subtitles = []
-k_step = (k_max - k_min) / (m - 1)
-tmp = k_min
-for i in range(n):
-    km_subtitles.append(r"$k_m = %5.2f$" % (tmp))
-    tmp += k_step
+if linear_excess_range:
+    k_step = (k_max - k_min) / (m - 1)
+    tmp = k_min
+    for i in range(n):
+        km_subtitles.append(r"$k_m = %5.2f$" % (tmp))
+        tmp += k_step
+else:
+    km_subtitles = [
+        r"$k_m = -1.0$",
+        r"$k_m = -0.5$",
+        r"$k_m = 0.0$",
+        r"$k_m = 1.0$",
+        r"$k_m = 2.0$",
+        r"$k_m = 4.0$"
+    ]
 
-kw_subtitles = []
-k_step = (k_max - k_min) / (n - 1)
-tmp = k_min
-for i in range(m):
-    kw_subtitles.append(r"$k_w = %5.2f$" % (tmp))
-    tmp += k_step
+if linear_excess_range:
+    kw_subtitles = []
+    k_step = (k_max - k_min) / (n - 1)
+    tmp = k_min
+    for i in range(m):
+        kw_subtitles.append(r"$k_w = %5.2f$" % (tmp))
+        tmp += k_step
+else:
+    kw_subtitles = [
+        r"$k_w = -1.0$",
+        r"$k_w = -0.5$",
+        r"$k_w = 0.0$",
+        r"$k_w = 1.0$",
+        r"$k_w = 2.0$",
+        r"$k_w = 4.0$"
+    ]
 
 # ticks count
 xt_cnt = 5
@@ -114,17 +141,26 @@ for column in range(n):
             Z = np.append(Z, Z_dat[i])
 
         # create x-y points to be used in heatmap
-        xi = np.linspace(X.min(), X.max(), 1000)
-        yi = np.linspace(Y.min(), Y.max(), 1000)
+        xi = np.linspace(X.min(), X.max(), 2000)
+        yi = np.linspace(Y.min(), Y.max(), 2000)
 
         # Z is a matrix of x-y values
-        zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]), method = 'cubic')
+        zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]),
+            method = 'linear')
 
         # current heatmap building
         clev = np.arange(zmin, zmax, smooth_coeff)
-        hm = ax.contourf(xi, yi, zi, clev, cmap = color_map,
-            vmax = zmax, vmin = zmin, extend = "both")
-        hm.set_clim(zmin, zmax)
+        hm = ax.contourf(
+            xi,
+            yi,
+            zi,
+            clev,
+            cmap = color_map,
+            vmax = zmax,
+            vmin = zmin,
+            extend = "both"
+        )
+        hm.set_clim(zmin, zmax + 0.5)
 
         # set labels and ticks for plot columns
         if row == m - 1:
