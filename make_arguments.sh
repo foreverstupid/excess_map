@@ -25,12 +25,6 @@ m_args="m.txt"
 w_args="w.txt"
 rm -f $m_args $w_args
 
-args=$1
-if [ -z $args ]
-then
-    args="args.txt"
-fi
-
 # WARNING!!! second part was removed due to similar grids for m and w.
 # If you want to compute not symmetrical case, please add the second part
 echo "Creating arguments..."
@@ -55,7 +49,9 @@ do
     rm -f $temp_file
 done
 
+# instead of the second part
 cp $m_args $w_args
+
 echo "Collecting them together..."
 
 # $m_args and $w_args files have next form:
@@ -100,3 +96,5 @@ do
     ((shft_mb += $count_d_m))
     ((shft_me += $count_d_m))
 done
+
+rm -f $m_args $w_args

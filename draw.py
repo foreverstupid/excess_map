@@ -62,16 +62,16 @@ if linear_excess_range:
     k_step = (k_max - k_min) / (m - 1)
     tmp = k_min
     for i in range(n):
-        km_subtitles.append(r"$k_m = %5.2f$" % (tmp))
+        km_subtitles.append(r"$k_\mathrm{m} = %5.2f$" % (tmp))
         tmp += k_step
 else:
     km_subtitles = [
-        r"$k_m = -1.0$",
-        r"$k_m = -0.5$",
-        r"$k_m = 0.0$",
-        r"$k_m = 1.0$",
-        r"$k_m = 2.0$",
-        r"$k_m = 4.0$"
+        r"$k_\mathrm{m} = -1$",
+        r"$k_\mathrm{m} = -0.5$",
+        r"$k_\mathrm{m} = 0$",
+        r"$k_\mathrm{m} = 1$",
+        r"$k_\mathrm{m} = 2$",
+        r"$k_\mathrm{m} = 4$"
     ]
 
 if linear_excess_range:
@@ -83,12 +83,12 @@ if linear_excess_range:
         tmp += k_step
 else:
     kw_subtitles = [
-        r"$k_w = -1.0$",
-        r"$k_w = -0.5$",
-        r"$k_w = 0.0$",
-        r"$k_w = 1.0$",
-        r"$k_w = 2.0$",
-        r"$k_w = 4.0$"
+        r"$k_\mathrm{w} = -1$",
+        r"$k_\mathrm{w} = -0.5$",
+        r"$k_\mathrm{w} = 0$",
+        r"$k_\mathrm{w} = 1$",
+        r"$k_\mathrm{w} = 2$",
+        r"$k_\mathrm{w} = 4$"
     ]
 
 # ticks count
@@ -121,10 +121,9 @@ fig, axes = plt.subplots(
     nrows = m,
     ncols = n
 )
-fig.suptitle(
-    r"$N(k_m, k_w, \sigma_m, \sigma_w)$ (" + dimension + "D case)",
-    fontsize = 40
-)
+suptitle = r"$N(k_\mathrm{m}, k_\mathrm{w}, \sigma_\mathrm{m}, " + \
+    "\sigma_\mathrm{w})$ (" + dimension + "D case)"
+fig.suptitle(suptitle, fontsize = 40)
 
 # setting each subplot
 for column in range(n):
@@ -141,12 +140,17 @@ for column in range(n):
             Z = np.append(Z, Z_dat[i])
 
         # create x-y points to be used in heatmap
-        xi = np.linspace(X.min(), X.max(), 2000)
-        yi = np.linspace(Y.min(), Y.max(), 2000)
+        xi = np.linspace(X.min(), X.max(), 3000)
+        yi = np.linspace(Y.min(), Y.max(), 3000)
 
         # Z is a matrix of x-y values
-        zi = griddata((X, Y), Z, (xi[None,:], yi[:,None]),
-            method = 'linear')
+        zi = griddata(
+            (X, Y),
+            Z,
+            (xi[None,:],
+            yi[:,None]),
+            method = 'cubic'
+        )
 
         # current heatmap building
         clev = np.arange(zmin, zmax, smooth_coeff)
@@ -164,21 +168,30 @@ for column in range(n):
 
         # set labels and ticks for plot columns
         if row == m - 1:
-            ax.set_xlabel(km_subtitles[column], fontsize = "large")
+            ax.set_xlabel(
+                km_subtitles[column], 
+                fontsize = "large",
+                labelpad = 15
+            )
             ax.xaxis.set_label_position("top")
 
         if row == 0:
-            ax.set_xlabel(r"$\sigma_m$", fontsize = "large")
+            ax.set_xlabel(r"$\sigma_\mathrm{m}$", fontsize = "large")
             ax.xaxis.set_major_locator(ticker.MaxNLocator(xt_cnt))
             ax.tick_params(axis = "x", which = "both", labelsize = tck_size)
 
         # set labels and ticks for plot rows
         if column == n - 1:
-            ax.set_ylabel(kw_subtitles[row], fontsize = "large")
+            ax.set_ylabel(
+                kw_subtitles[row],
+                fontsize = "large",
+                rotation = 270,
+                labelpad = 35
+            )
             ax.yaxis.set_label_position("right")
 
         if column == 0:
-            ax.set_ylabel(r"$\sigma_w$", fontsize = "large")
+            ax.set_ylabel(r"$\sigma_\mathrm{w}$", fontsize = "large")
             ax.yaxis.set_major_locator(ticker.MaxNLocator(xt_cnt))
             ax.tick_params(axis = "y", which = "both", labelsize = tck_size)
 
