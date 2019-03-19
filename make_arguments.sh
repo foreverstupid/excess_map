@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # m(x) excess grid
-km_grid="-1.0 -0.5 0.0 1.0 2.0 4.0"
-count_k_m=6
+km_grid="-0.7 -0.5 0.0 1.0 2.0"
+count_k_m=5
 
 # m(x) dispersion grid
 origin_d_m=0.05
@@ -10,8 +10,8 @@ count_d_m=20
 last_d_m=0.5
 
 # w(x) excess grid
-kw_grid="-1.0 -0.5 0.0 1.0 2.0 4.0"
-count_k_w=6
+kw_grid="-0.7 -0.5 0.0 1.0 2.0"
+count_k_w=5
 
 # w(x) dispersion grid
 origin_d_w=0.05
@@ -23,6 +23,7 @@ eps=0.001
 
 m_args="m.txt"
 w_args="w.txt"
+args="args.txt"
 rm -f $m_args $w_args
 
 # WARNING!!! second part was removed due to similar grids for m and w.

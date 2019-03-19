@@ -10,7 +10,11 @@ then
     dim=1
 fi
 
-static_params="-a 0.4 -d 0 -b 1 -s 0.4 -e 7 -p n -r n -D $dim -n 10000 -i 300"
+b=1.0
+s=0.4
+d=0.0
+static_params="-a 0.4 -d $d -b $b -s $s -e 7 -p n -r n -D $dim -n 10000 -i 300"
+meanfield=`echo "($b - $d) / $s" | bc -l`
 plot_data="surface${dim}d.plt"
 args="args.txt"
 
@@ -54,14 +58,14 @@ do
             if [ $N = "nan" -o $N = "-nan" ]
             then
                 echo "NAN"
-                N=1.0
+                N=10.0
             fi
 
             N=`echo $N | sed -e 's/^[[:space:]]*//'`
-
-            echo "${pars[0]} ${pars[1]} ${pars[2]} ${pars[3]} $N" `
+            relN=`echo "$N / $meanfield" | bc -l`
+            echo "${pars[0]} ${pars[1]} ${pars[2]} ${pars[3]} $relN" `
                ` >> $plot_part
-            echo "Solved: $N (${pars[4]} ${pars[5]} ${pars[6]} ${pars[7]})"
+            echo "Solved: $N [$relN] (${pars[4]} ${pars[5]} ${pars[6]} ${pars[7]})"
         fi
     done &
 
