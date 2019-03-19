@@ -17,7 +17,7 @@ input_file_name = "surface" + dimension + "d.plt"
 output_file_name = "plots" + dimension + "d.png"
 
 # plot matrix dimensions
-m = n = 6
+m = n = 5
 
 # count of data values for the one plot
 shift = 400
@@ -36,7 +36,7 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.07
+smooth_coeff = 0.05
 
 # excess ranges setting
 if len(sys.argv) > 5:
@@ -70,8 +70,7 @@ else:
         r"$k_\mathrm{m} = -0.5$",
         r"$k_\mathrm{m} = 0$",
         r"$k_\mathrm{m} = 1$",
-        r"$k_\mathrm{m} = 2$",
-        r"$k_\mathrm{m} = 4$"
+        r"$k_\mathrm{m} = 2$"
     ]
 
 if linear_excess_range:
@@ -87,8 +86,7 @@ else:
         r"$k_\mathrm{w} = -0.5$",
         r"$k_\mathrm{w} = 0$",
         r"$k_\mathrm{w} = 1$",
-        r"$k_\mathrm{w} = 2$",
-        r"$k_\mathrm{w} = 4$"
+        r"$k_\mathrm{w} = 2$"
     ]
 
 # ticks count
@@ -149,7 +147,7 @@ for column in range(n):
             Z,
             (xi[None,:],
             yi[:,None]),
-            method = 'cubic'
+            method = "cubic"
         )
 
         # current heatmap building
@@ -164,7 +162,7 @@ for column in range(n):
             vmin = zmin,
             extend = "both"
         )
-        hm.set_clim(zmin, zmax + 0.5)
+        hm.set_clim(zmin, zmax + 0.15)
 
         # set labels and ticks for plot columns
         if row == m - 1:
@@ -201,7 +199,7 @@ print("Drawing...")
 cax = fig.add_axes([0.94, 0.05, 0.03, 0.87])
 cbar = fig.colorbar(hm, cax = cax)
 cbar.locator = ticker.MaxNLocator(10)
-cbar.formatter = ticker.FormatStrFormatter("%3.1f")
+cbar.formatter = ticker.FuncFormatter(lambda y, _: "{:.0%}".format(y))
 cbar.update_ticks()
 
 # subplots adjust
