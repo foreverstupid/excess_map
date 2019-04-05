@@ -1,5 +1,5 @@
-#ifndef KURTIC_MODULE_HPP
-#define KURTIC_MODULE_HPP
+#ifndef KERNELS_MODULE_H
+#define KERNELS_MODULE_H
 
 #include <math.h>
 #include <gsl/gsl_math.h>
@@ -8,9 +8,9 @@
 #include "vector.h"
 
 /*
- * Params for kurtic functions
+ * Params for calculation method
  */
-struct kurtic_params{
+struct params{
     double k;                   /* excess kurtosis value */
     double d;                   /* dispersion value */
 
@@ -18,11 +18,17 @@ struct kurtic_params{
 };
 
 
+/* Kurtic kernel */
 int kurtic_f(const gsl_vector *x, void *params, gsl_vector *f);
 
 int kurtic_df(const gsl_vector *x, void *params, gsl_matrix *J);
 
 int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
     gsl_matrix *J);
+
+
+
+/* Roughgarden kernel */
+int rgarden_f(const gsl_vector *x, void *params, gsl_vector *f);
 
 #endif

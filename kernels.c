@@ -1,4 +1,4 @@
-#include "kurtic.h"
+#include "kernels.h"
 
 /*
  * Kurtic kernel
@@ -252,7 +252,7 @@ inline static double psgn(double x)
 int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
     gsl_matrix *J)
 {
-    struct kurtic_params *p = (struct kurtic_params *)params;
+    struct params *p = (struct params *)params;
     double curr_k;
     double curr_d;
     double s0 = gsl_vector_get(x, 0);
@@ -270,7 +270,7 @@ int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
 
 int kurtic_df(const gsl_vector *x, void *params, gsl_matrix *J)
 {
-    struct kurtic_params *p = (struct kurtic_params *)params;
+    struct params *p = (struct params *)params;
     double s0 = gsl_vector_get(x, 0);
     double s1 = gsl_vector_get(x, 1);
 
@@ -283,7 +283,7 @@ int kurtic_df(const gsl_vector *x, void *params, gsl_matrix *J)
 
 int kurtic_f(const gsl_vector *x, void *params, gsl_vector *f)
 {
-    struct kurtic_params *p = (struct kurtic_params *)params;
+    struct params *p = (struct params *)params;
     double curr_k;
     double curr_d;
     double s0 = gsl_vector_get(x, 0);

@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -O3
 LDFLAGS =
 LIBS = -lm -lgsl -lgslcblas
 
-SRC_FILES = vector.c kurtic.c solver.c
+SRC_FILES = vector.c kernels.c solver.c
 OBJS = $(SRC_FILES:%.c=%.o)
 
 NAME = excess

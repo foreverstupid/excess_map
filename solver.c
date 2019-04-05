@@ -3,7 +3,7 @@
 /*
  * Initializes multidimensional solver.
  */
-static gsl_multiroot_fdfsolver *make_solver()
+static gsl_multiroot_fdfsolver *make_fdf_solver()
 {
     const gsl_multiroot_fdfsolver_type *T = gsl_multiroot_fdfsolver_gnewton;
     return gsl_multiroot_fdfsolver_alloc(T, 2);
@@ -14,15 +14,15 @@ static gsl_multiroot_fdfsolver *make_solver()
 /*
  * Initializes result information
  */
-static void init_result_info(struct result *res, struct problem_info p)
+static void init_result_info(struct result *res, struct problem_info *p)
 {
-    int length = p.k_grid.count * p.d_grid.count;
+    int length = p->k_grid.count * p->d_grid.count;
 
-    res->s0.storage = malloc(sizeof(double) * length);
-    res->s0.grid.count = length;
+    res->a.storage = malloc(sizeof(double) * length);
+    res->a.grid.count = length;
 
-    res->s1.storage = malloc(sizeof(double) * length);
-    res->s1.grid.count = length;
+    res->b.storage = malloc(sizeof(double) * length);
+    res->b.grid.count = length;
 }
 
 
@@ -30,22 +30,22 @@ static void init_result_info(struct result *res, struct problem_info p)
 /*
  * Solves an equation system
  */
-static void find_root(
-    double *s0,
-    double *s1,
+static void find_root_fdf(
+    double *a,
+    double *b,
     gsl_multiroot_fdfsolver *solver,
     gsl_multiroot_function_fdf *f,
     int max_iter_count,
     double eps,
-    double beg_s0,
-    double beg_s1
+    double beg_a,
+    double beg_b
 )
 {
     int status;
     size_t iter = 0;
     gsl_vector *x = gsl_vector_alloc(2);
-    gsl_vector_set(x, 0, beg_s0);
-    gsl_vector_set(x, 1, beg_s1);
+    gsl_vector_set(x, 0, beg_a);
+    gsl_vector_set(x, 1, beg_b);
 
     gsl_multiroot_fdfsolver_set(solver, f, x);
 
@@ -61,8 +61,8 @@ static void find_root(
         status = gsl_multiroot_test_residual(solver->f, eps);
     }while(status == GSL_CONTINUE && iter < max_iter_count);
 
-    *s0 = gsl_vector_get(solver->x, 0);
-    *s1 = gsl_vector_get(solver->x, 1);
+    *a = gsl_vector_get(solver->x, 0);
+    *b = gsl_vector_get(solver->x, 1);
 
     gsl_vector_free(x);
 }
@@ -70,56 +70,57 @@ static void find_root(
 
 
 /*
- * Creates begin vector.
+ * Creates begin vector
  */
-void get_begin(double d, double k, double *s0, double *s1)
+void get_begin(struct problem_info *p, double d, double k, double *a,
+    double *b)
 {
     if(d < 1 && k <= 0){
-        *s0 = 0.1;
-        *s1 = 0.02;
+        *a = 0.1;
+        *b = 0.02;
         return;
     }
 
     if(k > 0){
-        *s0 = 10;
-        *s1 = 1;
+        *a = 10;
+        *b = 1;
         return;
     }
 
-    *s0 = 400;
-    *s1 = 0.01;
+    *a = 400;
+    *b = 0.01;
 
 #   ifdef DEBUG
-    printf("Begin: (s0_0 = %lf, s1_0 = %lf)\n", *s0, *s1);
+    printf("Begin: (s0_0 = %lf, s1_0 = %lf)\n", *a, *b);
 #   endif
 }
 
 
 
 /*
- * Solves the problem
+ * Solves the problem using derevative method
  */
-struct result solve(struct problem_info p)
+struct result solve_fdf(struct problem_info *p)
 {
     int i;
     int j;
-    double k = p.k_grid.origin;
+    double k = p->k_grid.origin;
     double d;
-    double s0;
-    double s1;
-    gsl_multiroot_fdfsolver *solver = make_solver();
-    gsl_multiroot_function_fdf f = { &kurtic_f, &kurtic_df, &kurtic_fdf, 2, NULL };
-    struct kurtic_params params;
+    double a;
+    double b;
+    gsl_multiroot_fdfsolver *solver = make_fdf_solver();
+    gsl_multiroot_function_fdf f = { p->f, p->df, p->fdf, 2, NULL };
+    struct params params;
     struct result res;
 
     init_result_info(&res, p);
-    params.buffer.storage = malloc(sizeof(double) * p.space_grid.count);
-    params.buffer.grid = p.space_grid;
+    params.buffer.storage = malloc(sizeof(double) * p->space_grid.count);
+    params.buffer.grid = p->space_grid;
     f.params = &params;
 
-    for(i = 0; i < p.k_grid.count; i++){
-        d = p.d_grid.origin;
-        for(j = 0; j < p.d_grid.count; j++){
+    for(i = 0; i < p->k_grid.count; i++){
+        d = p->d_grid.origin;
+        for(j = 0; j < p->d_grid.count; j++){
             params.k = k;
             params.d = d * d;
 
@@ -129,30 +130,30 @@ struct result solve(struct problem_info p)
                 params.buffer.grid.count);
 #           endif
 
-            get_begin(params.d, params.k, &s0, &s1); 
-            find_root(
-                res.s0.storage + i * p.d_grid.count + j,
-                res.s1.storage + i * p.d_grid.count + j,
+            get_begin(p, params.d, params.k, &a, &b); 
+            find_root_fdf(
+                res.a.storage + i * p->d_grid.count + j,
+                res.b.storage + i * p->d_grid.count + j,
                 solver,
                 &f,
-                p.iter_count,
-                p.eps,
-                s0,
-                s1
+                p->iter_count,
+                p->eps,
+                a,
+                b
             );
             printf(
                 "Input: (k = %lf, d = %lf)\n"
                 "Solution: (s0 = %lf, s1 = %lf)\n\n",
                 k,
                 params.d,
-                res.s0.storage[i * p.d_grid.count + j],
-                res.s1.storage[i * p.d_grid.count + j]
+                res.a.storage[i * p->d_grid.count + j],
+                res.b.storage[i * p->d_grid.count + j]
             );
 
-            d += p.d_grid.step;
+            d += p->d_grid.step;
         }
 
-        k += p.k_grid.step;
+        k += p->k_grid.step;
     }
 
     free(params.buffer.storage);

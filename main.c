@@ -49,6 +49,10 @@ struct problem_info make_problem_info(int argc, const char **argv)
     sscanf(argv[8], "%lf", &(info.eps));
     info.iter_count = 100;
 
+    info.f = kurtic_f;
+    info.df = kurtic_df;
+    info.fdf = kurtic_fdf;
+
     return info;
 }
 
@@ -87,8 +91,8 @@ void print(struct result res, struct output_info oinf)
                 "%lf %lf %lf %lf\n",
                 k,
                 d,
-                res.s0.storage[index + j],
-                res.s1.storage[index + j]
+                res.a.storage[index + j],
+                res.b.storage[index + j]
             );
 
             d += oinf.d_grid.step;
@@ -138,11 +142,11 @@ int main(int argc, const char **argv)
     print_given_info(prinf, oinf);
 #   endif
 
-    struct result res = solve(prinf);
+    struct result res = solve_fdf(&prinf);
     print(res, oinf);
 
-    free(res.s0.storage);
-    free(res.s1.storage);
+    free(res.a.storage);
+    free(res.b.storage);
 
     return 0;
 }

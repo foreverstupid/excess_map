@@ -27,8 +27,8 @@ if len(sys.argv) > 3:
     zmin = float(sys.argv[2])
     zmax = float(sys.argv[3])
 else:
-    zmin = 0.0
-    zmax = 8.0
+    zmin = 0.8
+    zmax = 2.05
 
 # data columns
 x_column = 2;
@@ -36,7 +36,7 @@ y_column = 3;
 z_column = 4;
 
 # smooth coefficient for color gradient
-smooth_coeff = 0.05
+smooth_coeff = 0.01
 
 # excess ranges setting
 if len(sys.argv) > 5:
@@ -66,8 +66,8 @@ if linear_excess_range:
         tmp += k_step
 else:
     km_subtitles = [
-        r"$k_\mathrm{m} = -1$",
-        r"$k_\mathrm{m} = -0.5$",
+        r"$k_\mathrm{m} = -0.74$",
+        r"$k_\mathrm{m} = -0.37$",
         r"$k_\mathrm{m} = 0$",
         r"$k_\mathrm{m} = 1$",
         r"$k_\mathrm{m} = 2$"
@@ -82,8 +82,8 @@ if linear_excess_range:
         tmp += k_step
 else:
     kw_subtitles = [
-        r"$k_\mathrm{w} = -1$",
-        r"$k_\mathrm{w} = -0.5$",
+        r"$k_\mathrm{w} = -0.74$",
+        r"$k_\mathrm{w} = -0.37$",
         r"$k_\mathrm{w} = 0$",
         r"$k_\mathrm{w} = 1$",
         r"$k_\mathrm{w} = 2$"
@@ -138,8 +138,8 @@ for column in range(n):
             Z = np.append(Z, Z_dat[i])
 
         # create x-y points to be used in heatmap
-        xi = np.linspace(X.min(), X.max(), 3000)
-        yi = np.linspace(Y.min(), Y.max(), 3000)
+        xi = np.linspace(X.min(), X.max(), 2000)
+        yi = np.linspace(Y.min(), Y.max(), 2000)
 
         # Z is a matrix of x-y values
         zi = griddata(
@@ -147,7 +147,7 @@ for column in range(n):
             Z,
             (xi[None,:],
             yi[:,None]),
-            method = "cubic"
+            method = "linear"
         )
 
         # current heatmap building
@@ -163,6 +163,12 @@ for column in range(n):
             extend = "both"
         )
         hm.set_clim(zmin, zmax + 0.15)
+        cont = ax.contour(
+            hm,
+            levels = [ 1.0 ],
+            colors = "black",
+            linewidths = 2
+        )
 
         # set labels and ticks for plot columns
         if row == m - 1:
@@ -197,9 +203,19 @@ print("Drawing...")
 
 # color bar settings
 cax = fig.add_axes([0.94, 0.05, 0.03, 0.87])
-cbar = fig.colorbar(hm, cax = cax)
-cbar.locator = ticker.MaxNLocator(10)
+color_step = 0.2
+ticks = [
+    1 + i * color_step
+    for i in range(int(abs((zmax - 1) / color_step)) + 2)
+]
+ticks += [
+    1 - i * color_step
+    for i in range(1, int(abs((1 - zmin) / color_step)) + 2)
+]
+
+cbar = fig.colorbar(hm, cax = cax, ticks = ticks)
 cbar.formatter = ticker.FuncFormatter(lambda y, _: "{:.0%}".format(y))
+cbar.add_lines(cont)
 cbar.update_ticks()
 
 # subplots adjust
