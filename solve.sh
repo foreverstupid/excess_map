@@ -13,7 +13,7 @@ fi
 b=1.0
 s=0.4
 d=0.0
-static_params="-a 0.4 -d $d -b $b -s $s -e 7 -p n -r n -D $dim -n 10000 -i 300"
+static_params="-A 0.67 -B 0.167 -G 0.167 -d $d -b $b -s $s -e 7 -p n -r n -D $dim -n 10000 -i 300"
 meanfield=`echo "($b - $d) / $s" | bc -l`
 plot_data="surface${dim}d.plt"
 args="args.txt"
