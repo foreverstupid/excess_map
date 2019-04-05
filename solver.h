@@ -17,6 +17,13 @@ typedef int (*FDFunc)(const gsl_vector *, void *, gsl_vector *,
     gsl_matrix *);
 
 /*
+ * Avaliable kernel types
+ */
+#define KURTIC 'k'
+#define RGARDEN 'r'
+
+
+/*
  * Holds info about problem initial data
  */
 struct problem_info{
@@ -26,6 +33,8 @@ struct problem_info{
     struct linspace space_grid;     /* grid of space */
     int iter_count;                 /* iteration max count */
     double eps;                     /* precision */
+
+    char kern_type;                 /* kernel type */
 
     FFunc f;                        /* function GSL representation */
     DFunc df;                       /* derivative GSL representation */
@@ -45,8 +54,8 @@ struct result{
 
 
 /*
- * Solves the problem using derivative method
+ * Solves the problem
  */
-struct result solve_fdf(struct problem_info *p);
+struct result solve(struct problem_info *p);
 
 #endif

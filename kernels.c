@@ -1,22 +1,16 @@
 #include "kernels.h"
 
+typedef double (*Func)(double, double, double);
+
 /*
- * Kurtic kernel
+ * Gets an origin of integration
  */
-inline static double kernel(double x, double s0, double s1)
-{
-    double xx = x * x;
-    return exp(-0.5 * (s0 * xx + s1 * xx * xx) / (1 + xx));
-}
-
-
-
-static double get_origin(double s0, double s1)
+static double get_origin(Func kernel, double a, double b)
 {
     double x = 0.0;
     double step = 1e-5;
 
-    while(fabs(kernel(x, s0, s1)) > 1e-12){
+    while(fabs(kernel(x, a, b)) > 1e-12){
         x -= step;
     }
 
@@ -29,7 +23,73 @@ static double get_origin(double s0, double s1)
 
 
 
-static void get_current_values_df(double s0, double s1, struct vector_func *buf, gsl_matrix *J)
+/*
+ * Gets current dispertion and excess kurtosis of the kernel
+ */
+static void get_current_values_f(
+    Func kernel,
+    double *k,
+    double *d,
+    double a,
+    double b,
+    struct vector_func *buf
+)
+{
+    double norm;
+    double x;
+    int i;
+
+    buf->grid.origin = get_origin(kernel, a, b);
+    buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
+
+    x = buf->grid.origin;
+    for(i = 0; i < buf->grid.count; i++){
+        buf->storage[i] = kernel(x, a, b);
+        x += buf->grid.step;
+    }
+
+    norm = get_norm(buf);
+
+    x = buf->grid.origin;
+    for(i = 0; i < buf->grid.count; i++){
+        buf->storage[i] *= x * x;
+        x += buf->grid.step;
+    }
+
+    *d = get_integral(buf) / norm;
+
+    x = buf->grid.origin;
+    for(i = 0; i < buf->grid.count; i++){
+        buf->storage[i] *= x * x;
+        x += buf->grid.step;
+    }
+
+    *k = get_integral(buf) / norm / (*d) / (*d) - 3;
+#       ifdef DEBUG
+        printf("k = %lf, d = %lf\n", *k, *d);
+        printf("{a = %lf, b = %lf}\n", a, b);
+#       endif
+}
+
+
+
+/*=======================================================================*/
+/*                            Kurtic kernel                              */
+/*=======================================================================*/
+inline static double kurtic_kernel(double x, double s0, double s1)
+{
+    double xx = x * x;
+    return exp(-0.5 * (s0 * xx + s1 * xx * xx) / (1 + xx));
+}
+
+
+
+static void get_current_kurtic_values_df(
+    double s0,
+    double s1,
+    struct vector_func *buf,
+    gsl_matrix *J
+)
 {
     double norm;
     double mu;
@@ -46,12 +106,12 @@ static void get_current_values_df(double s0, double s1, struct vector_func *buf,
     double tmp;
     int i;
 
-    buf->grid.origin = get_origin(s0, s1);
+    buf->grid.origin = get_origin(&kurtic_kernel, s0, s1);
     buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
 
     x = buf->grid.origin;
     for(i = 0; i < buf->grid.count; i++){
-        buf->storage[i] = kernel(x, s0, s1);
+        buf->storage[i] = kurtic_kernel(x, s0, s1);
         x += buf->grid.step;
     }
 
@@ -117,10 +177,14 @@ static void get_current_values_df(double s0, double s1, struct vector_func *buf,
 
 
 
-
-
-static void get_current_values_fdf(double *k, double *d, double s0, double s1,
-    struct vector_func *buf, gsl_matrix *J)
+static void get_current_kurtic_values_fdf(
+    double *k,
+    double *d,
+    double s0,
+    double s1,
+    struct vector_func *buf,
+    gsl_matrix *J
+)
 {
     double norm;
     double mu;
@@ -136,12 +200,12 @@ static void get_current_values_fdf(double *k, double *d, double s0, double s1,
     double tmp;
     int i;
 
-    buf->grid.origin = get_origin(s0, s1);
+    buf->grid.origin = get_origin(&kurtic_kernel, s0, s1);
     buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
 
     x = buf->grid.origin;
     for(i = 0; i < buf->grid.count; i++){
-        buf->storage[i] = kernel(x, s0, s1);
+        buf->storage[i] = kurtic_kernel(x, s0, s1);
         x += buf->grid.step;
     }
 
@@ -203,52 +267,6 @@ static void get_current_values_fdf(double *k, double *d, double s0, double s1,
 
 
 
-static void get_current_values_f(double *k, double *d, double s0, double s1,
-    struct vector_func *buf)
-{
-    double norm;
-    double x;
-    int i;
-
-    buf->grid.origin = get_origin(s0, s1);
-    buf->grid.step = 2 * fabs(buf->grid.origin) / (buf->grid.count - 1);
-
-    x = buf->grid.origin;
-    for(i = 0; i < buf->grid.count; i++){
-        buf->storage[i] = kernel(x, s0, s1);
-        x += buf->grid.step;
-    }
-
-    norm = get_norm(buf);
-
-    x = buf->grid.origin;
-    for(i = 0; i < buf->grid.count; i++){
-        buf->storage[i] *= x * x;
-        x += buf->grid.step;
-    }
-
-    *d = get_integral(buf) / norm;
-
-    x = buf->grid.origin;
-    for(i = 0; i < buf->grid.count; i++){
-        buf->storage[i] *= x * x;
-        x += buf->grid.step;
-    }
-
-    *k = get_integral(buf) / norm / (*d) / (*d) - 3;
-#       ifdef DEBUG
-        printf("k = %lf, d = %lf\n", *k, *d);
-        printf("{s0 = %lf, s1 = %lf}\n", s0, s1);
-#       endif
-}
-
-inline static double psgn(double x)
-{
-    return 0.0;//x > 0 ? 0.0 : 1.0;
-}
-
-
-
 int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
     gsl_matrix *J)
 {
@@ -258,10 +276,11 @@ int kurtic_fdf(const gsl_vector *x, void *params, gsl_vector *f,
     double s0 = gsl_vector_get(x, 0);
     double s1 = gsl_vector_get(x, 1);
 
-    get_current_values_fdf(&curr_k, &curr_d, s0, s1, &(p->buffer), J);
+    get_current_kurtic_values_fdf(&curr_k, &curr_d, s0, s1, &(p->buffer),
+        J);
 
-    gsl_vector_set(f, 0, curr_k - p->k + psgn(s0) + psgn(s1));
-    gsl_vector_set(f, 1, curr_d - p->d + psgn(s0) + psgn(s1));
+    gsl_vector_set(f, 0, curr_k - p->k);
+    gsl_vector_set(f, 1, curr_d - p->d);
 
     return GSL_SUCCESS;
 }
@@ -274,7 +293,7 @@ int kurtic_df(const gsl_vector *x, void *params, gsl_matrix *J)
     double s0 = gsl_vector_get(x, 0);
     double s1 = gsl_vector_get(x, 1);
 
-    get_current_values_df(s0, s1, &(p->buffer), J);
+    get_current_kurtic_values_df(s0, s1, &(p->buffer), J);
 
     return GSL_SUCCESS;
 }
@@ -289,10 +308,45 @@ int kurtic_f(const gsl_vector *x, void *params, gsl_vector *f)
     double s0 = gsl_vector_get(x, 0);
     double s1 = gsl_vector_get(x, 1);
 
-    get_current_values_f(&curr_k, &curr_d, s0, s1, &(p->buffer));
+    get_current_values_f(&kurtic_kernel, &curr_k, &curr_d, s0, s1,
+        &(p->buffer));
 
-    gsl_vector_set(f, 0, curr_k - p->k + psgn(s0) + psgn(s1));
-    gsl_vector_set(f, 1, curr_d - p->d + psgn(s0) + psgn(s1));
+    gsl_vector_set(f, 0, curr_k - p->k);
+    gsl_vector_set(f, 1, curr_d - p->d);
+
+    return GSL_SUCCESS;
+}
+
+
+
+
+
+
+
+
+/*=======================================================================*/
+/*                          Roughgarden kernel                           */
+/*=======================================================================*/
+inline static double rgarden_kernel(double x, double s, double g)
+{
+    return exp(-pow(fabs(x / s), g));
+}
+
+
+
+int rgarden_f(const gsl_vector *x, void *params, gsl_vector *f)
+{
+    struct params *rgarden_params = (struct params *)params;
+    double s = gsl_vector_get(x, 0);
+    double g = gsl_vector_get(x, 1);
+    double curr_k;
+    double curr_d;
+
+    get_current_values_f(&rgarden_kernel, &curr_k, &curr_d, s, g,
+        &(rgarden_params->buffer));
+    
+    gsl_vector_set(f, 0, curr_k - rgarden_params->k);
+    gsl_vector_set(f, 1, curr_d - rgarden_params->d);
 
     return GSL_SUCCESS;
 }

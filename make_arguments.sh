@@ -34,7 +34,7 @@ for km in $km_grid
 do
     temp_files[$ind]=`mktemp`
     ./excess $km 1 $km $origin_d_m $count_d_m $last_d_m \
-             100001 $eps ${temp_files[$ind]} &
+             100001 $eps k ${temp_files[$ind]} &
     pids[$ind]=$!
     ((ind += 1))
 done
