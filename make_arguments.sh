@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # m(x) excess grid
-km_grid="-0.7 -0.5 0.0 1.0 2.0"
+km_grid="-1.1 -0.5 0.0 1.0 2.0"
 count_k_m=5
 
 # m(x) dispersion grid
@@ -10,7 +10,7 @@ count_d_m=20
 last_d_m=0.5
 
 # w(x) excess grid
-kw_grid="-0.7 -0.5 0.0 1.0 2.0"
+kw_grid="-1.1 -0.5 0.0 1.0 2.0"
 count_k_w=5
 
 # w(x) dispersion grid
@@ -19,7 +19,7 @@ count_d_w=20
 last_d_w=0.5
 
 #accurancy
-eps=0.001
+eps=0.00001
 
 m_args="m.txt"
 w_args="w.txt"
@@ -34,7 +34,7 @@ for km in $km_grid
 do
     temp_files[$ind]=`mktemp`
     ./excess $km 1 $km $origin_d_m $count_d_m $last_d_m \
-             100001 $eps k ${temp_files[$ind]} &
+             100001 $eps r ${temp_files[$ind]} &
     pids[$ind]=$!
     ((ind += 1))
 done

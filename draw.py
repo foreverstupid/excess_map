@@ -66,8 +66,8 @@ if linear_excess_range:
         tmp += k_step
 else:
     km_subtitles = [
-        r"$k_\mathrm{m} = -0.74$",
-        r"$k_\mathrm{m} = -0.37$",
+        r"$k_\mathrm{m} = -1.1$",
+        r"$k_\mathrm{m} = -0.5$",
         r"$k_\mathrm{m} = 0$",
         r"$k_\mathrm{m} = 1$",
         r"$k_\mathrm{m} = 2$"
@@ -82,8 +82,8 @@ if linear_excess_range:
         tmp += k_step
 else:
     kw_subtitles = [
-        r"$k_\mathrm{w} = -0.74$",
-        r"$k_\mathrm{w} = -0.37$",
+        r"$k_\mathrm{w} = -1.1$",
+        r"$k_\mathrm{w} = -0.5$",
         r"$k_\mathrm{w} = 0$",
         r"$k_\mathrm{w} = 1$",
         r"$k_\mathrm{w} = 2$"
@@ -147,7 +147,7 @@ for column in range(n):
             Z,
             (xi[None,:],
             yi[:,None]),
-            method = "linear"
+            method = "cubic"
         )
 
         # current heatmap building

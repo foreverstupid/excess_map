@@ -74,7 +74,7 @@ static void get_begin(struct problem_info *p, double d, double k, double *a,
     }
 
 #   ifdef DEBUG
-    printf("Begin: (s0_0 = %lf, s1_0 = %lf)\n", *a, *b);
+    printf("Begin: (a_0 = %lf, b_0 = %lf)\n", *a, *b);
 #   endif
 }
 
@@ -168,7 +168,7 @@ static struct result solve_fdf(struct problem_info *p)
             );
             printf(
                 "Input: (k = %lf, d = %lf)\n"
-                "Solution: (s0 = %lf, s1 = %lf)\n\n",
+                "Solution: (a= %lf, b= %lf)\n\n",
                 k,
                 params.d,
                 res.a.storage[i * p->d_grid.count + j],
@@ -277,7 +277,7 @@ static struct result solve_f(struct problem_info *p)
             );
             printf(
                 "Input: (k = %lf, d = %lf)\n"
-                "Solution: (s0 = %lf, s1 = %lf)\n\n",
+                "Solution: (a = %lf, b = %lf)\n\n",
                 k,
                 params.d,
                 res.a.storage[i * p->d_grid.count + j],
