@@ -55,6 +55,8 @@ void make_problem_info(int argc, const char **argv, struct problem_info **p)
         (*p)->fdf = kurtic_fdf;
     }else if((*p)->kern_type == RGARDEN){
         (*p)->f = rgarden_f;
+    }else if((*p)->kern_type == POLYEXP){
+        (*p)->f = polyexp_f;
     }else{
         *p = NULL;
     }

@@ -145,8 +145,7 @@ for column in range(n):
         zi = griddata(
             (X, Y),
             Z,
-            (xi[None,:],
-            yi[:,None]),
+            (xi[None,:], yi[:,None]),
             method = "cubic"
         )
 

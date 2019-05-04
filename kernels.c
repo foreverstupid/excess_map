@@ -350,3 +350,37 @@ int rgarden_f(const gsl_vector *x, void *params, gsl_vector *f)
 
     return GSL_SUCCESS;
 }
+
+
+
+
+
+
+
+/*=======================================================================*/
+/*                       Exponent polynomial kernel                      */
+/*=======================================================================*/
+inline static double polyexp_kernel(double x, double a, double b)
+{
+    double xx = x * x;
+    return exp(-a * xx - b * xx * xx);
+}
+
+
+
+int polyexp_f(const gsl_vector *x, void *params, gsl_vector *f)
+{
+    struct params *polyexp_params = (struct params *)params;
+    double s = gsl_vector_get(x, 0);
+    double g = gsl_vector_get(x, 1);
+    double curr_k;
+    double curr_d;
+
+    get_current_values_f(&polyexp_kernel, &curr_k, &curr_d, s, g,
+        &(polyexp_params->buffer));
+    
+    gsl_vector_set(f, 0, curr_k - polyexp_params->k);
+    gsl_vector_set(f, 1, curr_d - polyexp_params->d);
+
+    return GSL_SUCCESS;
+}

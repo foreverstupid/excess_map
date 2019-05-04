@@ -68,6 +68,14 @@ static void get_begin(struct problem_info *p, double d, double k, double *a,
         }else{
             *b = 1;
         }
+    }else if(p->kern_type == POLYEXP){
+        if(k < 0){
+            *b = 1;
+            *a = 0;
+        }else{
+            *b = 0;
+            *a = 1;
+        }
     }else{
         *a = 1;
         *b = 1;

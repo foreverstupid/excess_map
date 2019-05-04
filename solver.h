@@ -21,6 +21,7 @@ typedef int (*FDFunc)(const gsl_vector *, void *, gsl_vector *,
  */
 #define KURTIC 'k'
 #define RGARDEN 'r'
+#define POLYEXP 'p'
 
 
 /*
